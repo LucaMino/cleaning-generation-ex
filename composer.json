@@ -1,0 +1,17 @@
+{
+    "name": "lucaminorello/cleaning-generation-ex",
+    "autoload": {
+        "psr-4": {
+            "Lucaminorello\\CleaningGenerationEx\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Luca Minorello",
+            "email": "lucaminorello78@gmail.com"
+        }
+    ],
+    "require": {
+        "tecnickcom/tcpdf": "^6.10"
+    }
+}
