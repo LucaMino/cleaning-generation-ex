@@ -1,10 +1,7 @@
 {
     "name": "lucaminorello/cleaning-generation-ex",
-    "autoload": {
-        "psr-4": {
-            "Lucaminorello\\CleaningGenerationEx\\": "src/"
-        }
-    },
+    "description": "PHP project that generates spiral patterns from sanitized strings and exports them to PDF.",
+    "type": "project",
     "authors": [
         {
             "name": "Luca Minorello",
@@ -12,6 +9,16 @@
         }
     ],
     "require": {
+        "php": ">=8.1",
         "tecnickcom/tcpdf": "^6.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
 }

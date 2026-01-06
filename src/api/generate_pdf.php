@@ -32,7 +32,7 @@ if(json_last_error() !== JSON_ERROR_NONE)
     exit;
 }
 
-// TODO validate required field
+// validate required fields
 if(!isset($data['content']) || !is_array($data['content']) || count($data['content']) === 0)
 {
     http_response_code(422);
@@ -116,7 +116,7 @@ function spiralFromCenter($str)
     $index = 1;
     $steps = 2;
     $dx = [2, 0, -2, 0];
-    $dy = [0, -2, 0, 2];
+    $dy = [0, 2, 0, -2];        // $dy = [0, -2, 0, 2];
     $dir = 0;
 
     while ($index < $len) {
