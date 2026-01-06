@@ -1,0 +1,31 @@
+# Dependencies
+/vendor
+
+# Storage (generated files)
+/storage
+
+# Git
+.git
+.gitignore
+
+# Docker files (not needed in image)
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
