@@ -17,9 +17,10 @@ if($_SERVER['REQUEST_METHOD'] !== 'GET')
 
 // sanitize file ID
 $fileId = basename(trim($_GET['id'] ?? ''));
+$module = basename(trim($_GET['module'] ?? ''));
 
 // validate file ID
-if($fileId === '' || !preg_match('/^[a-f0-9.]{23}$/', $fileId))
+if($fileId === '' || !preg_match('/^[a-f0-9.]{20,30}$/', $fileId))
 {
     http_response_code(422);
     header('Content-Type: application/json');
@@ -30,7 +31,16 @@ if($fileId === '' || !preg_match('/^[a-f0-9.]{23}$/', $fileId))
     exit;
 }
 
-$filePath = $pdfDir . '/' . $fileId . '.pdf';
+// validate module
+if(!in_array($module, ['pairs', 'brackets']))
+{
+    http_response_code(422);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Invalid or missing module']);
+    exit;
+}
+
+$filePath = $pdfDir . '/' . $module . '/' . $fileId . '.pdf';
 
 // check if file exists
 if(!file_exists($filePath) || !is_file($filePath))

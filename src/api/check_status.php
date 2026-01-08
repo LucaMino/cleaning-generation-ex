@@ -12,8 +12,13 @@ if($_SERVER['REQUEST_METHOD'] !== 'GET')
     echo json_encode(['error' => 'Method Not Allowed']);
     exit;
 }
-// validate content type
-if(!isset($_GET['id']) || trim($_GET['id']) === '')
+
+// sanitize file ID
+$fileId = basename(trim($_GET['id'] ?? ''));
+$module = basename(trim($_GET['module'] ?? 'default'));
+
+// validate file ID
+if($fileId === '' || !preg_match('/^[a-f0-9.]{20,30}$/', $fileId))
 {
     http_response_code(422);
     echo json_encode([
@@ -23,9 +28,18 @@ if(!isset($_GET['id']) || trim($_GET['id']) === '')
     exit;
 }
 
-// sanitize file ID
-$fileId = basename(trim($_GET['id']));
-$filePath = $pdfDir . '/' . $fileId . '.pdf';
+// validate module
+if(!in_array($module, ['brackets', 'pairs']))
+{
+    http_response_code(422);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Invalid module'
+    ]);
+    exit;
+}
+
+$filePath = $pdfDir . '/' . $module . '/' . $fileId . '.pdf';
 
 try
 {
@@ -34,7 +48,7 @@ try
         // file is ready, return download URL
         echo json_encode([
             'status' => 'completed',
-            'download_url' => '/api/download_pdf.php?id=' . $fileId
+            'download_url' => '/api/download_pdf.php?id=' . $fileId . '&module=' . $module
         ]);
     } else {
         // file not ready yet

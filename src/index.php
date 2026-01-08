@@ -11,8 +11,12 @@
         <h1>Cleaning Tools</h1>
         <!-- Buttons -->
         <div>
-            <a href="brackets"><button>Cleaning Brackets</button></a>
-            <a href="pairs-en"><button>Cleaning Pairs</button></a>
+            <a href="brackets">
+                <button type="button" class="btn-primary">Cleaning Brackets</button>
+            </a>
+            <a href="pairs-en">
+                <button type="button" class="btn-primary">Cleaning Pairs</button>
+            </a>
         </div>
     </body>
 </html>

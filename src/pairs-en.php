@@ -11,11 +11,18 @@
         <h1>Cleaning Pairs</h1>
         <!-- Buttons -->
         <div>
-            <button type="button" class="btn-primary" onclick="processStrings()">Process</button>
-            <button type="button" class="btn-primary" onclick="generatePDF()">Generate PDF</button>
+            <button type="button" class="btn-primary" onclick="processStrings('pairs')">Process</button>
+            <button
+                id="generate-pdf-btn"
+                type="button"
+                class="btn-primary"
+                onclick="generatePDF('pairs')"
+            >
+                Generate PDF
+            </button>
         </div>
         <!-- Download file -->
-        <div id="download-link"></div>
+        <div id="download-link" data-module="pairs"></div>
         <!-- Input/Output -->
         <div class="container">
             <div class="col">
@@ -26,7 +33,6 @@
                     placeholder="You can input multiple strings, one per line"
                 ></textarea>
             </div>
-
             <div class="col">
                 <label for="output">Output</label>
                 <textarea id="output" readonly></textarea>
