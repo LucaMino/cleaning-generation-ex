@@ -3,10 +3,13 @@ FROM php:8.2-fpm-alpine
 # set workdir
 WORKDIR /var/www/html
 
+# install dependencies
 RUN apk add --no-cache \
-    libxml2-dev \
-    oniguruma-dev
+    oniguruma-dev \
+    fontconfig \
+    ttf-dejavu
 
+# install php extensions (mbstring needs oniguruma-dev)
 RUN docker-php-ext-install mbstring
 
 # install composer
@@ -21,8 +24,7 @@ COPY . .
 RUN composer dump-autoload --optimize
 
 # set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
 EXPOSE 9000
 
