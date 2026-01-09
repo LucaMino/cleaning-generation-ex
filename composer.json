@@ -1,11 +1,10 @@
 {
     "name": "lucaminorello/cleaning-generation-ex",
-    "description": "PHP project that generates spiral patterns from sanitized strings and exports them to PDF.",
+    "description": "A PHP web application that processes and sanitizes text strings, then generates spiral-pattern PDFs from the cleaned content.",
     "type": "project",
     "authors": [
         {
-            "name": "Luca Minorello",
-            "email": "lucaminorello78@gmail.com"
+            "name": "Luca Minorello"
         }
     ],
     "require": {
