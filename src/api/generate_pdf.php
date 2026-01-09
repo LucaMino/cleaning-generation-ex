@@ -51,6 +51,25 @@ if(!isset($data['module']) || !in_array($data['module'], ['pairs', 'brackets']))
 
 $module = $data['module'];
 
+// sanitize input strings
+$strings = sanitizeInput($data['content']);
+
+// limit number of strings to prevent abuse
+if(count($strings) > 100)
+{
+    http_response_code(422);
+    echo json_encode(['error' => 'No valid strings provided']);
+    exit;
+}
+
+// function to check if any string exceeds max length (estimated values, can be adjusted)
+if(exceedsMaxLength($strings))
+{
+    http_response_code(422);
+    echo json_encode(['error' => 'One or more strings exceed maximum length']);
+    exit;
+}
+
 // generate a unique file ID
 $fileId = uniqid('', true);
 
@@ -60,16 +79,14 @@ $response = [
 ];
 
 // return immediate response
-// echo json_encode($response);
+echo json_encode($response);
 
 // flush the response to the client, close the connection but let the script run
-// if(function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+if(function_exists('fastcgi_finish_request')) fastcgi_finish_request();
 
 // generate the PDF asynchronously
-try {
-    // sanitize and merge content
-    $strings = sanitizeInput($data['content']);
-
+try
+{
     // set pdf storage directory
     $pdfDir = dirname(__DIR__, 2) . '/storage/pdfs/' . $module;
 
@@ -111,6 +128,26 @@ function generatePdf(array $content, string $destination): void
     $pdf->Output($destination, 'F');
 }
 
+/**
+ * Checks if any string exceeds maximum length
+ *
+ * @param array $strings
+ * @param int $maxHoriz
+ * @param int $maxVert
+ * @return bool
+ */
+function exceedsMaxLength(array $strings, int $maxHoriz = 30, int $maxVert = 50): bool
+{
+    foreach($strings as $index => $str)
+    {
+        // retrieve max length based on orientation
+        $max = $index % 2 === 0 ? $maxHoriz : $maxVert;
+
+        if(mb_strlen($str) > $max) return true;
+    }
+    return false;
+}
+
 /* SPIRAL METHODS */
 
 /**
@@ -135,6 +172,7 @@ function createSpiral(array $strings): string
     $x = floor($matrixH / 2);
     $y = floor($matrixW / 2);
 
+    // direction vectors: right, down, left, up
     $dx = [0, 1, 0, -1];
     $dy = [1, 0, -1, 0];
     $dir = 0;
@@ -155,18 +193,21 @@ function createSpiral(array $strings): string
                 $matrix[$x][$y] = $char;
             }
 
+            // change direction at the end of the side
             if($i == $lenSide - 1)
             {
+                // rotate clockwise: 0,1,2,3,0 (right, down, left, up)
                 $dir = ($dir + 1) % 4;
             }
 
+            // move to next position
             $x += $dx[$dir];
             $y += $dy[$dir];
         }
     }
-    return getSpiralString(['matrix' => $matrix, 'h' => $matrixH, 'w' => $matrixW]);
+    // $a = $matrixH * $matrixW > ;
+    return getSpiralString(['matrix' => $matrix, 'h' => $matrixH, 'w' => $matrixW], false);
 }
-
 
 /**
  * Calculates the dimensions of the spiral matrix
@@ -185,22 +226,17 @@ function getMatrixDim(array $strings): array
         $len = mb_strlen($string);
         // determine side length, the first two sides are equal to the string length
         // the next sides are at least 2 units longer than the parallel side
-
-        // if($index == 2)
-        // {
-        //     max($len, $sides[$index - 2] + 1);
-        // } else {
-        //     $sides[$index] = ($index < 2) ? $len : max($len, $sides[$index - 2] + 2);
-        // }
-
-
         $sides[$index] = ($index < 2) ? $len : max($len, $sides[$index - 2] + 2);
+    }
+
+    foreach($sides as $index => $length)
+    {
         // even -> horizontal, odd -> vertical
         if($index % 2 === 0)
         {
-            $maxHorizontal += $sides[$index];
+            $maxHorizontal = max($maxHorizontal, $length);
         } else {
-            $maxVertical += $sides[$index];
+            $maxVertical = max($maxVertical, $length);
         }
     }
 
@@ -211,20 +247,32 @@ function getMatrixDim(array $strings): array
     ];
 }
 
-
-function getSpiralString(array $matrixData): string
+/**
+ * Converts the matrix to a string representation
+ *
+ * @param array $matrixData
+ * @return string
+ */
+function getSpiralString(array $matrixData, bool $smaller = false): string
 {
     $matrix = $matrixData['matrix'];
     $h = $matrixData['h'];
     $w = $matrixData['w'];
 
-    $minRow = $h; $maxRow = 0; $minCol = $w; $maxCol = 0;
-    foreach($matrix as $r => $riga)
+    // start with min/max at extremes
+    $minRow = $h;
+    $maxRow = 0;
+    $minCol = $w;
+    $maxCol = 0;
+
+    // scan matrix to find limits
+    foreach($matrix as $r => $row)
     {
-        foreach($riga as $c => $val)
+        foreach($row as $c => $val)
         {
             if($val !== ' ')
             {
+                // update limits
                 $minRow = min($minRow, $r);
                 $maxRow = max($maxRow, $r);
                 $minCol = min($minCol, $c);
@@ -234,20 +282,23 @@ function getSpiralString(array $matrixData): string
     }
 
     $lines = [];
-    for ($i = $minRow; $i <= $maxRow; $i++)
+
+    // loop through rows (from minRow to maxRow)
+    for($i = $minRow; $i <= $maxRow; $i++)
     {
         $line = [];
-        for ($j = $minCol; $j <= $maxCol; $j++)
+        // loop through columns (from minCol to maxCol)
+        for($j = $minCol; $j <= $maxCol; $j++)
         {
             $char = $matrix[$i][$j] ?? ' ';
-            $line[] = $char . " ";
+            // add char with a space for better readability
+            $line[] = $char . ($smaller ? '' : ' ');
         }
         $lines[] = implode('', $line);
     }
 
     return implode("\n", $lines);
 }
-
 
 /**
  * Returns sanitized and sorted input lines

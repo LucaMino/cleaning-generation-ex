@@ -15,7 +15,7 @@ if($_SERVER['REQUEST_METHOD'] !== 'GET')
 
 // sanitize file ID
 $fileId = basename(trim($_GET['id'] ?? ''));
-$module = basename(trim($_GET['module'] ?? 'default'));
+$module = basename(trim($_GET['module'] ?? ''));
 
 // validate file ID
 if($fileId === '' || !preg_match('/^[a-f0-9.]{20,30}$/', $fileId))
@@ -39,6 +39,7 @@ if(!in_array($module, ['brackets', 'pairs']))
     exit;
 }
 
+// build file path
 $filePath = $pdfDir . '/' . $module . '/' . $fileId . '.pdf';
 
 try
