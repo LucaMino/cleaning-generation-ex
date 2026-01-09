@@ -65,8 +65,8 @@ Once the PDF is generated asynchronously, a polling API checks the file status a
 
 ### Spiral Algorithm
 - Sort the input strings by length in ascending order
-- Calculates the matrix size based on the string lengths and the progressive growth of the spiral sides
-- Initializes an empty matrix and sets the starting point at the center
+- Simulates the path to calculate the exact matrix size
+- Initializes the matrix and sets the starting point using calculated offsets
 - Places characters following a spiral movement in the four directions, filling with '-' when needed
 - Crops empty areas of the matrix and returns the final spiral as a string used in the PDF
 
@@ -96,7 +96,7 @@ The current architecture prioritizes simplicity, fast development and minimal de
 
 3. **Storage**: Use cloud storage (S3, GCS) with signed URLs for secure, temporary access to generated PDFs
 
-4. **Managed Queue** – Cloud queue service that includes error handling via retries
+4. **Managed Queue** – A cloud queue service that allows you to track PDF generation jobs and retry failed tasks automatically
 
 5. **State Management** – Track job status and file_id in a database, using an anonymous token for users
 
