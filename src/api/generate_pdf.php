@@ -158,40 +158,36 @@ function exceedsMaxLength(array $strings, int $maxHoriz = 30, int $maxVert = 50)
  */
 function createSpiral(array $strings): string
 {
-    // retrieve matrix dim and sides
-    $result = getMatrixDim($strings);
+    // retrieve matrix dimensions
+    $matrixDim = getMatrixDim($strings);
 
-    $matrixH = $result['h'];
-    $matrixW = $result['w'];
-    $sides = $result['sides'];
+    $height = $matrixDim['height'];
+    $width = $matrixDim['width'];
 
     // initialize empty matrix
-    $matrix = array_fill(0, $matrixH, array_fill(0, $matrixW, ' '));
+    $matrix = array_fill(0, $height, array_fill(0, $width, ' '));
 
-    // set center point for horizontal and vertical
-    $x = floor($matrixH / 2);
-    $y = floor($matrixW / 2);
+    // starting coordinates (using offsets to center the spiral and avoid negative indexes)
+    $x = $matrixDim['offsetX'];
+    $y = $matrixDim['offsetY'];
 
-    // direction vectors: right, down, left, up
+    // first direction: right
+    $dir = 0;
+    // 0:right, 1:down, 2:left, 3:up
     $dx = [0, 1, 0, -1];
     $dy = [1, 0, -1, 0];
-    $dir = 0;
 
     foreach($strings as $index => $str)
     {
         $lenStr = mb_strlen($str);
-
         // determine side length (last side uses string length)
-        $lenSide = $index === count($sides) - 1 ? $lenStr : $sides[$index];
+        $lenSide = ($index === count($strings) - 1) ? $lenStr : $matrixDim['sides'][$index];
 
         for($i = 0; $i < $lenSide; $i++)
         {
             $char = $i < $lenStr ? mb_substr($str, $i, 1) : '-';
 
-            if(isset($matrix[$x][$y]))
-            {
-                $matrix[$x][$y] = $char;
-            }
+            $matrix[$x][$y] = $char;
 
             // change direction at the end of the side
             if($i == $lenSide - 1)
@@ -199,14 +195,13 @@ function createSpiral(array $strings): string
                 // rotate clockwise: 0,1,2,3,0 (right, down, left, up)
                 $dir = ($dir + 1) % 4;
             }
-
             // move to next position
             $x += $dx[$dir];
             $y += $dy[$dir];
         }
     }
-    // $a = $matrixH * $matrixW > ;
-    return getSpiralString(['matrix' => $matrix, 'h' => $matrixH, 'w' => $matrixW], false);
+
+    return getSpiralString(['matrix' => $matrix, 'h' => $height, 'w' => $width], false);
 }
 
 /**
@@ -217,8 +212,6 @@ function createSpiral(array $strings): string
  */
 function getMatrixDim(array $strings): array
 {
-    $maxHorizontal = 0;
-    $maxVertical = 0;
     $sides = [];
 
     foreach($strings as $index => $string)
@@ -229,21 +222,49 @@ function getMatrixDim(array $strings): array
         $sides[$index] = ($index < 2) ? $len : max($len, $sides[$index - 2] + 2);
     }
 
-    foreach($sides as $index => $length)
+    // starting coordinates (x: row, y: column)
+    $currX = 0;
+    $currY = 0;
+    // min/max coordinates
+    $minX = 0; $maxX = 0;
+    $minY = 0; $maxY = 0;
+    // first direction: right
+    $dir = 0;
+    // 0:right, 1:down, 2:left, 3:up
+    $dx = [0, 1, 0, -1];
+    $dy = [1, 0, -1, 0];
+
+    foreach($strings as $index => $string)
     {
-        // even -> horizontal, odd -> vertical
-        if($index % 2 === 0)
+        // determine side length (last side uses string length)
+        $lenSide = ($index === count($strings) - 1) ? mb_strlen($string) : $sides[$index];
+
+        for($i = 0; $i < $lenSide; $i++)
         {
-            $maxHorizontal = max($maxHorizontal, $length);
-        } else {
-            $maxVertical = max($maxVertical, $length);
+            // move to next position
+            $currX += $dx[$dir];
+            $currY += $dy[$dir];
+            // track the max/min rows reached
+            $minX = min($minX, $currX);
+            $maxX = max($maxX, $currX);
+            // track the max/min columns reached
+            $minY = min($minY, $currY);
+            $maxY = max($maxY, $currY);
+            // change direction at the end of the side
+            if($i == $lenSide - 1)
+            {
+                // rotate clockwise: 0,1,2,3,0 (right, down, left, up)
+                $dir = ($dir + 1) % 4;
+            }
         }
     }
 
     return [
-        'w' => $maxHorizontal + 10,
-        'h' => $maxVertical + 10,
-        'sides' => $sides
+        'width'  => $maxY - $minY + 1,  // total columns
+        'height' => $maxX - $minX + 1,  // total rows
+        'offsetX' => 0 - $minX,         // shift to start at row 0
+        'offsetY' => 0 - $minY,         // shift to start at column 0
+        'sides'  => $sides
     ];
 }
 
