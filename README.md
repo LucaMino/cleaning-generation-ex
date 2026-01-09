@@ -61,7 +61,7 @@ This solution works well at the current scale using PHP-FPM workers, while addin
 I chose to store a key-value object in the browser’s localStorage, mapping the module (brackets/pairs) to its file_id. This lets users retrieve their PDF even if the page is closed before generation is complete, improving UX without authentication.
 
 ### Polling System
-Once the PDF is generated asynchronously, a polling API checks the file status and returns it to the user when ready. A limit has been implemented to avoid infinite polling.
+Once the PDF is generated asynchronously, a polling API checks the file status and returns it to the user when ready.
 
 ### Spiral Algorithm
 - Sort the input strings by length in ascending order
