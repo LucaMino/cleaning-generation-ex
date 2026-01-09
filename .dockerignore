@@ -3,9 +3,11 @@
 
 # Storage (generated files)
 /storage
+/examples
 
 # Git
 .git
+.gitattributes
 .gitignore
 
 # Docker files (not needed in image)
