@@ -39,8 +39,13 @@ function generatePDF(module)
         body: JSON.stringify({ content: lines, module: module })
     })
     .then(response => {
-        if(!response.ok) {
-            throw new Error('HTTP error ' + response.status);
+        if(!response.ok)
+        {
+            return response.json().then(data => {
+                const error = new Error(data.error || 'Request failed');
+                error.status = response.status;
+                throw error;
+            });
         }
         return response.json();
     })
@@ -57,7 +62,7 @@ function generatePDF(module)
     })
     .catch(error => {
         generateBtn.disabled = false;
-        downloadLinkDiv.innerHTML = 'Error generating PDF.';
+        downloadLinkDiv.innerHTML = error.status === 422 ? error.message : 'Error generating PDF.';
     });
 }
 
